@@ -1,8 +1,9 @@
 // Products Model
 export interface Game {
   tiles: Tile[];
-  isFinished: boolean
-  gameParams: GameParams
+  isFinished: boolean;
+  isWon: boolean;
+  gameParams: GameParams;
 }
 
 export interface GameParams {
@@ -22,6 +23,7 @@ export interface Tile {
 const currentGame: Game = {
   tiles: [],
   isFinished: true, // Starts finish
+  isWon: false,
   gameParams: {} as GameParams
 }
 
@@ -32,6 +34,7 @@ export const getCurrentGame = (): Game => {
 export const generateGame = (gameParams: GameParams): Game => {
   currentGame.gameParams = gameParams;
   currentGame.tiles = [];
+  currentGame.isFinished = false;
 
   // Generate tiles
   for (let rowIdx = 0; rowIdx < gameParams.rowsNumber; rowIdx++) {
@@ -48,7 +51,6 @@ export const generateGame = (gameParams: GameParams): Game => {
   }
 
   generateBombs();
-  currentGame.isFinished = false;
 
   return currentGame;
 }
@@ -59,24 +61,25 @@ export const handleTileClick = (position: { x: number, y: number }): Game | any 
   })
 
   if (clickedTile) {
+    currentGame.isFinished = clickedTile.isABomb;
+    currentGame.isWon = (currentGame.tiles.filter(tile => !tile.isRevealed && tile.isABomb).length === currentGame.tiles.filter(tile => !tile.isRevealed).length)
+      && (currentGame.tiles.filter(tile => !tile.isRevealed).length === currentGame.gameParams.bombsNumber);
+
     clickedTile.isRevealed = true;
-
-    if (clickedTile.isABomb) currentGame.isFinished = true;
-
     clickedTile.numberOfBombsAround = calculateNumberOfBombsAround(clickedTile);
 
-    return currentGame;
+    if (clickedTile.numberOfBombsAround > 0) {
+      return currentGame;
+    } else {
+      const neighbors = getNeighbors(clickedTile);
+      neighbors.forEach(neighbor => {
+        if (!neighbor.isRevealed) {
+          return handleTileClick({ x: neighbor.x, y: neighbor.y });
+        }
+      })
+    }
 
-    // if (clickedTile.numberOfBombsAround > 0) {
-    //   return currentGame;
-    // } else {
-    //   const neighbors = getNeighbors(clickedTile);
-    //   neighbors.forEach(neighbor => {
-    //     if (!neighbor.isRevealed) {
-    //       handleTileClick({ x: neighbor.x, y: neighbor.y });
-    //     }
-    //   })
-    // }
+    return currentGame;
   }
 }
 
@@ -99,7 +102,25 @@ const generateBombs = (): void => {
 }
 
 const getNeighbors = (tile: Tile): Tile[] => {
-  return [];
+  const neighbors: Tile[] = [];
+
+  const neighborsCoords = [
+    { x: tile.x - 1, y: tile.y - 1 },
+    { x: tile.x, y: tile.y - 1 },
+    { x: tile.x + 1, y: tile.y - 1 },
+    { x: tile.x - 1, y: tile.y },
+    { x: tile.x + 1, y: tile.y },
+    { x: tile.x - 1, y: tile.y + 1 },
+    { x: tile.x, y: tile.y + 1 },
+    { x: tile.x + 1, y: tile.y + 1 },
+  ];
+
+  neighborsCoords.map(coords => {
+    const foundTile = currentGame.tiles.find(tile => tile.x === coords.x && tile.y === coords.y);
+    if (foundTile) neighbors.push(foundTile);
+  })
+
+  return neighbors;
 }
 
 const calculateNumberOfBombsAround = (tile: Tile): number => {

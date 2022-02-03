@@ -11,18 +11,16 @@ router.get('/', (req, res, next) => {
 // Products routes
 router.post('/game', (req, res, next) => {
   const gameParams: GameParams = req.body?.gameParams;
-  console.log(req.body)
 
-  if (gameParams) {
+  if (gameParams && (gameParams.colsNumber * gameParams.rowsNumber) > gameParams.bombsNumber) {
     res.json(generateGame(gameParams));
   } else {
-    res.json({ error: 'Please provide cols, rows and bombs parameters' });
+    res.json({ error: 'Please provide valid cols, rows and bombs parameters' });
   }
 });
 
 router.post('/play', (req, res, next) => {
   const position: { x: number, y: number } = req.body?.position;
-  console.log(req.body)
 
   if (position) {
     res.json(handleTileClick(position));
