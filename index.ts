@@ -12,6 +12,6 @@ app.use(express.json());
 
 app.use(router);
 
-app.listen(3001, () => {
+app.listen(process.env.port, () => {
   console.log(`Minesweeper api listening at http://localhost:3001`)
 });
