@@ -61,11 +61,15 @@ export const handleTileClick = (position: { x: number, y: number }): Game | any 
   })
 
   if (clickedTile) {
-    currentGame.isFinished = clickedTile.isABomb;
     currentGame.isWon = (currentGame.tiles.filter(tile => !tile.isRevealed && tile.isABomb).length === currentGame.tiles.filter(tile => !tile.isRevealed).length)
       && (currentGame.tiles.filter(tile => !tile.isRevealed).length === currentGame.gameParams.bombsNumber);
 
     clickedTile.isRevealed = true;
+
+    if (clickedTile.isABomb) {
+      currentGame.isFinished = true;
+      return currentGame;
+    }
     clickedTile.numberOfBombsAround = calculateNumberOfBombsAround(clickedTile);
 
     if (clickedTile.numberOfBombsAround > 0) {
@@ -73,7 +77,7 @@ export const handleTileClick = (position: { x: number, y: number }): Game | any 
     } else {
       const neighbors = getNeighbors(clickedTile);
       neighbors.forEach(neighbor => {
-        if (!neighbor.isRevealed) {
+        if (!neighbor.isRevealed && !neighbor.isABomb) {
           return handleTileClick({ x: neighbor.x, y: neighbor.y });
         }
       })
