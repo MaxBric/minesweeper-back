@@ -27,10 +27,6 @@ const currentGame: Game = {
   gameParams: {} as GameParams
 }
 
-export const getCurrentGame = (): Game => {
-  return currentGame;
-}
-
 export const generateGame = (gameParams: GameParams): Game => {
   currentGame.gameParams = gameParams;
   currentGame.tiles = [];
@@ -68,6 +64,11 @@ export const handleTileClick = (position: { x: number, y: number }): Game | any 
 
     if (clickedTile.isABomb) {
       currentGame.isFinished = true;
+      currentGame.tiles.map(tile => {
+        tile.numberOfBombsAround = calculateNumberOfBombsAround(tile);
+        tile.isRevealed = true;
+        return;
+      })
       return currentGame;
     }
     clickedTile.numberOfBombsAround = calculateNumberOfBombsAround(clickedTile);
