@@ -1,9 +1,8 @@
 // Routes
 import { Router } from 'express'
+import { GameParams, generateGame, handleTileClick } from './models/Game'
 
 const router = Router();
-
-import { GameParams, generateGame, handleTileClick } from './models/Game'
 
 router.get('/', (req, res, next) => {
   res.send('Welcome')
@@ -31,6 +30,5 @@ router.post('/play', (req, res, next) => {
     res.json({ error: 'Please provide position parameters' });
   }
 });
-
 
 export default router;
