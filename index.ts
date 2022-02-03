@@ -1,5 +1,6 @@
 import express from 'express'
 import cors from 'cors'
+import 'dotenv/config'
 
 import router from './routes'
 
@@ -11,7 +12,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 app.use(router);
-
-app.listen(process.env.port, () => {
-  console.log(`Minesweeper api listening at http://localhost:3001`)
+console.log(process.env);
+app.listen(process.env.PORT, () => {
+  console.log(`Minesweeper api listening at http://localhost:${process.env.PORT}`)
 });
